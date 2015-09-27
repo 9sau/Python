@@ -1,0 +1,35 @@
+from socket import *
+
+HOST, PORT = '', 9201
+
+serverSocket = socket(AF_INET, SOCK_STREAM)
+serverSocket.bind((HOST, PORT))
+serverSocket.listen(1)
+
+while True:
+    print 'Ready to serve HTTP requests on port %s ...' % PORT
+    connectionSocket, address = serverSocket.accept()
+
+    try:
+        requestMessage = connectionSocket.recv(1024)
+        # print requestMessage,'::', requestMessage.split()[0],'::',requestMessage.split()[1]
+        print requestMessage
+        filename = requestMessage.split()[1]
+        # print filename,'||',filename[1:]
+
+        f = open(filename[1:])
+        data = f.read()
+        # print data
+        connectionSocket.send('\nHTTP/1.1 200 OK\n\n')
+
+        for i in range(0, len(data)):
+            print "data at %i" % i + " " + data[i]
+            connectionSocket.send(data[i])
+        connectionSocket.close()
+
+    except IOError:
+        print "404 Not Fond"
+        connectionSocket.send('HTTP/1.1 404 Not Found\n\n')
+        connectionSocket.close()
+
+serverSocket.close()
